@@ -41,8 +41,19 @@ export default {
   watch: {
     background: {
       immediate: true,
-      handler(val) {
-        document.documentElement.style.setProperty('--background-app', val)
+      handler(background, oldBackground) {
+        document.documentElement.style.setProperty('--prev-background-app', oldBackground)
+
+        const { classList } = document.getElementById('app')
+
+        classList.add(`background-app-after`)
+        document.documentElement.style.setProperty('--background-app', background)
+
+        setTimeout(() => {
+          for (let i = 1; i < classList.length; i += 1) {
+            if (classList[i].includes('-after')) classList.remove(classList[i])
+          }
+        }, 400)
       }
     },
     color: {
@@ -86,22 +97,52 @@ export default {
   width: 100%;
   max-width: 100vw;
   overflow: hidden;
+  background-color: transparent;
 
   &::before {
-    background-image: var(--background-app);
-    background-size: 100% 100%;
+    content: '';
     position: absolute;
     left: -5%;
     top: -5%;
-    content: '';
     height: 110%;
     width: 110%;
     opacity: 0.85;
+    background-image: var(--background-app);
+    background-size: 100% 100%;
+    z-index: -2;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 110%;
+    left: -5%;
+    height: 0;
+    width: 0;
+    opacity: 0.85;
+    background-size: 100% 100%;
+    z-index: -1;
   }
 
   @include small-height {
     min-height: calc(var(--vh, 1vh) * 100);
     height: 100%;
+  }
+}
+
+#app.background-app-after {
+  &::before {
+    background-image: var(--prev-background-app);
+  }
+
+  &::after {
+    top: -5%;
+    width: 110%;
+    height: 110%;
+    background-image: var(--background-app);
+    transform-origin: center center;
+    opacity: 0.85;
+    transition: 0.4s;
   }
 }
 
